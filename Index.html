@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presença Fácil</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f0f0f0;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+
+    button {
+      cursor: pointer;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    .filter-input {
+      padding: 8px;
+      margin-bottom: 10px;
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+
+    .responsive-table {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      max-height: 300px;
+      overflow-y: auto;
+      text-align: center;
+    }
+
+    .modal-content ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .modal-content li {
+      margin: 5px 0;
+      padding: 5px;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+    }
+
+    .modal-close {
+      margin-top: 15px;
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* Ajuste para mobile */
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 15px;
+      }
+
+      th, td {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Cadastro de Pessoas</h1>
+<div class="container">
+  <label for="name">Nome</label>
+  <input type="text" id="name" placeholder="Digite o nome">
+
+  <label for="age">Idade</label>
+  <input type="number" id="age" placeholder="Digite a idade">
+
+  <label for="address">Endereço</label>
+  <input type="text" id="address" placeholder="Digite o endereço">
+
+  <button onclick="addOrUpdatePerson()">Salvar Pessoa</button>
+
+  <input type="text" id="filter" class="filter-input" placeholder="Filtrar por nome..." oninput="filterList()">
+  
+  <div class="responsive-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Endereço</th>
+          <th>Presenças</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="personList"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal para exibir as datas de presença -->
+<div id="presenceModal" class="modal">
+  <div class="modal-content">
+    <h2>Presenças</h2>
+    <ul id="presenceList"></ul>
+    <button class="modal-close" onclick="closeModal()">Fechar</button>
+  </div>
+</div>
+
+<script>
+  let people = JSON.parse(localStorage.getItem('people')) || [];
+
+  function renderPeopleList() {
+    const personList = document.getElementById('personList');
+    personList.innerHTML = '';
+    people.forEach((person, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${person.name}</td>
+        <td>${person.address}</td>
+        <td><span onclick="showPresence(${index})" style="cursor: pointer; color: blue;">${person.presences ? person.presences.length : 0}</span></td>
+        <td>
+          <button onclick="markPresence(${index})">Marcar Presença</button>
+          <button onclick="editPerson(${index})">Editar</button>
+        </td>
+      `;
+      personList.appendChild(row);
+    });
+    localStorage.setItem('people', JSON.stringify(people));
+  }
+
+  function addOrUpdatePerson() {
+    const name = document.getElementById('name').value;
+    const age = document.getElementById('age').value;
+    const address = document.getElementById('address').value;
+    const index = document.getElementById('personIndex')?.value;
+
+    if (index === undefined || index === '') {
+      people.push({ name, age, address, presences: [] });
+    } else {
+      people[index] = { ...people[index], name, age, address };
+    }
+
+    localStorage.setItem('people', JSON.stringify(people)); 
+
+    document.getElementById('name').value = '';
+    document.getElementById('age').value = '';
+    document.getElementById('address').value = '';
+    document.getElementById('personIndex')?.remove();
+    
+    renderPeopleList();
+  }
+
+  function markPresence(index) {
+    const today = new Date().toLocaleDateString();
+    if(!people[index].presences){
+        people[index].presences = [];
+    }
+    if (people[index].presences.length == 0 || !people[index].presences.includes(today)) {
+      people[index].presences.push(today);
+      renderPeopleList();
+    } else {
+      alert('A pessoa já possui presença para hoje.');
+    }
+  }
+
+  function showPresence(index) {
+    const presenceList = document.getElementById('presenceList');
+    presenceList.innerHTML = '';
+    people[index].presences.forEach(date => {
+      const li = document.createElement('li');
+      li.textContent = date;
+      presenceList.appendChild(li);
+    });
+    document.getElementById('presenceModal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('presenceModal').style.display = 'none';
+  }
+
+  function editPerson(index) {
+    document.getElementById('name').value = people[index].name;
+    document.getElementById('age').value = people[index].age;
+    document.getElementById('address').value = people[index].address;
+
+    if (!document.getElementById('personIndex')) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.id = 'personIndex';
+      input.value = index;
+      document.querySelector('.container').appendChild(input);
+    } else {
+      document.getElementById('personIndex').value = index;
+    }
+  }
+
+  function filterList() {
+    const filterText = document.getElementById('filter').value.toLowerCase();
+    const filteredPeople = people.filter(person => person.name.toLowerCase().includes(filterText));
+    renderFilteredList(filteredPeople);
+  }
+
+  function renderFilteredList(filteredPeople) {
+    const personList = document.getElementById('personList');
+    personList.innerHTML = '';
+    filteredPeople.forEach((person, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${person.name}</td>
+        <td>${person.address}</td>
+        <td><span onclick="showPresence(${index})" style="cursor: pointer; color: blue;">${person.presences.length}</span></td>
+        <td>
+          <button onclick="markPresence(${index})">Marcar Presença</button>
+          <button onclick="editPerson(${index})">Editar</button>
+        </td>
+      `;
+      personList.appendChild(row);
+    });
+  }
+
+  renderPeopleList();
+</script>
+
+</body>
+</html>
