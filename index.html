@@ -207,6 +207,7 @@
         <td>
           <button onclick="markPresence(${index})">Marcar Presença</button>
           <button onclick="editPerson(${index})">Editar</button>
+          <button onclick="deletePerson(${index})">Excluir</button>
         </td>
       `;
       personList.appendChild(row);
@@ -298,11 +299,19 @@
         <td>
           <button onclick="markPresence(${index})">Marcar Presença</button>
           <button onclick="editPerson(${index})">Editar</button>
+          <button onclick="deletePerson(${index})">Excluir</button>
         </td>
       `;
       personList.appendChild(row);
     });
   }
+
+  function deletePerson(index) {
+    people.splice(index, 1);
+    localStorage.setItem('people', JSON.stringify(people));
+    renderPeopleList();
+}
+
 
   renderPeopleList();
 </script>
