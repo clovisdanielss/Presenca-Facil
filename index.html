@@ -168,6 +168,14 @@
 
   <input type="text" id="filter" class="filter-input" placeholder="Filtrar por nome..." oninput="filterList()">
   
+<!-- Botões de Exportar e Importar -->
+<div>
+    <button onclick="exportData()">Exportar Dados</button>
+    <input type="file" id="fileInput" onchange="importData(event)" style="display: none;" />
+    <button onclick="document.getElementById('fileInput').click()">Importar Dados</button>
+</div>
+
+
   <div class="responsive-table">
     <table>
       <thead>
@@ -311,6 +319,54 @@
     localStorage.setItem('people', JSON.stringify(people));
     renderPeopleList();
 }
+
+function exportData() {
+    const data = localStorage.getItem('people');
+    const fileName = `people_data_${Date.now()}.json`;
+    
+    // Verifica se há dados no localStorage
+    if (data) {
+        const blob = new Blob([data], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+    } else {
+        alert('Não há dados para exportar!');
+    }
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    
+    if (file) {
+        const reader = new FileReader();
+        
+        // Quando o arquivo for carregado
+        reader.onload = function(e) {
+            try {
+                // Tenta parsear o conteúdo como JSON
+                const importedData = JSON.parse(e.target.result);
+                
+                // Verifica se o JSON tem o formato correto (deve ser um array)
+                if (Array.isArray(importedData)) {
+                    localStorage.setItem('people', JSON.stringify(importedData));
+                    people = JSON.parse(localStorage.getItem('people')) || [];
+                    alert('Dados importados com sucesso!');
+                    renderPeopleList();  // Re-renderiza a lista de pessoas
+                } else {
+                    alert('O arquivo não contém dados válidos. Certifique-se de que o formato é correto.');
+                }
+            } catch (error) {
+                alert('Erro ao importar o arquivo! Verifique se o arquivo está em formato JSON.');
+            }
+        };
+        
+        // Lê o arquivo como texto
+        reader.readAsText(file);
+    }
+}
+
 
 
   renderPeopleList();
