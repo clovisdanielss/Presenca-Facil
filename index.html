@@ -168,13 +168,6 @@
 
   <input type="text" id="filter" class="filter-input" placeholder="Filtrar por nome..." oninput="filterList()">
   
-<!-- Botões de Exportar e Importar -->
-<div>
-    <button onclick="exportData()">Exportar Dados</button>
-    <input type="file" id="fileInput" onchange="importData(event)" style="display: none;" />
-    <button onclick="document.getElementById('fileInput').click()">Importar Dados</button>
-</div>
-
 
   <div class="responsive-table">
     <table>
@@ -189,7 +182,15 @@
       <tbody id="personList"></tbody>
     </table>
   </div>
+
+  <div style="display: flex; justify-content: space-between;">
+    <button style="width: 47%; display: inline-block;" onclick="exportData()">Exportar Dados</button>
+    <input type="file" id="fileInput" onchange="importData(event)" style="display: none;" />
+    <button style="width: 47%; display: inline-block;" onclick="document.getElementById('fileInput').click()">Importar Dados</button>
 </div>
+</div>
+
+
 
 <!-- Modal para exibir as datas de presença -->
 <div id="presenceModal" class="modal">
