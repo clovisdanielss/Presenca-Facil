@@ -184,9 +184,10 @@
   </div>
 
   <div style="display: flex; justify-content: space-between;">
-    <button style="width: 47%; display: inline-block;" onclick="exportData()">Exportar Dados</button>
+    <button style="width: 30%; display: inline-block;" onclick="exportData()">Exportar Dados</button>
     <input type="file" id="fileInput" onchange="importData(event)" style="display: none;" />
-    <button style="width: 47%; display: inline-block;" onclick="document.getElementById('fileInput').click()">Importar Dados</button>
+    <button style="width: 30%; display: inline-block;" onclick="document.getElementById('fileInput').click()">Importar Dados</button>
+    <button style="width: 30%; display: inline-block;" onclick="showLottery()">Sorteio</button>
 </div>
 </div>
 
@@ -197,6 +198,16 @@
   <div class="modal-content">
     <h2>Presenças</h2>
     <ul id="presenceList"></ul>
+    <button class="modal-close" onclick="closeModal()">Fechar</button>
+  </div>
+</div>
+
+<div id="lotteryModal" class="modal">
+  <div class="modal-content">
+    <h2>Sorteio</h2>
+    <button style="width: 49%; display: inline-block;" onclick="lottery(people.filter(p => p.age <= 10))">Crianças</button>
+    <button style="width: 49%; display: inline-block;" onclick="lottery(people.filter(p => p.age > 10))">Adultos</button>
+
     <button class="modal-close" onclick="closeModal()">Fechar</button>
   </div>
 </div>
@@ -222,6 +233,15 @@
       personList.appendChild(row);
     });
     localStorage.setItem('people', JSON.stringify(people));
+  }
+
+  function lottery(persons){
+    console.log(persons, "Teste")
+    var queryString = "persons="
+    persons.forEach((a, index) =>{
+      queryString += a.name + (index == persons.length-1 ? "" : "&persons=")
+    });
+    window.location.href = `https://clovisdanielss.github.io/Roleta/?${queryString}`
   }
 
   function addOrUpdatePerson() {
@@ -259,6 +279,10 @@
     }
   }
 
+  function showLottery(){
+    document.getElementById('lotteryModal').style.display = 'flex';
+  }
+
   function showPresence(index) {
     const presenceList = document.getElementById('presenceList');
     presenceList.innerHTML = '';
@@ -272,6 +296,7 @@
 
   function closeModal() {
     document.getElementById('presenceModal').style.display = 'none';
+    document.getElementById('lotteryModal').style.display = 'none';
   }
 
   function editPerson(index) {
